@@ -1,0 +1,136 @@
+version: '3.8'
+
+services:
+  # Banco de Dados MySQL
+  mysql:
+    image: mysql:8.0
+    container_name: relatorios_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword123
+      MYSQL_DATABASE: relatorios_db
+      MYSQL_USER: miguel
+      MYSQL_PASSWORD: miguel123
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "3306:3306"
+    networks:
+      - relatorios_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # RabbitMQ para Filas
+  rabbitmq:
+    image: rabbitmq:3.12-management
+    container_name: relatorios_rabbitmq
+    restart: always
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin123
+    ports:
+      - "5672:5672"   # AMQP
+      - "15672:15672" # Management UI
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - relatorios_network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Aplicação Web Node.js
+  app:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    container_name: relatorios_app
+    restart: always
+    environment:
+      NODE_ENV: production
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: miguel
+      DB_PASSWORD: miguel123
+      DB_NAME: relatorios_db
+      RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
+      SESSION_SECRET: muitosecreto123xyz
+      PORT: 3000
+      # MailTrap Config (adicione suas credenciais)
+      MAILTRAP_HOST: smtp.mailtrap.io
+      MAILTRAP_PORT: 2525
+      MAILTRAP_USER: seu_usuario_mailtrap
+      MAILTRAP_PASS: sua_senha_mailtrap
+      EMAIL_FROM: sistema@relatorios.com
+      EMAIL_TO: miguel@empresa.com
+    ports:
+      - "3000:3000"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - relatorios_network
+
+  # Consumer (Worker) para processar filas
+  consumer:
+    build:
+      context: ./app
+      dockerfile: Dockerfile.consumer
+    container_name: relatorios_consumer
+    restart: always
+    environment:
+      NODE_ENV: production
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: miguel
+      DB_PASSWORD: miguel123
+      DB_NAME: relatorios_db
+      RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
+      # MailTrap Config
+      MAILTRAP_HOST: smtp.mailtrap.io
+      MAILTRAP_PORT: 2525
+      MAILTRAP_USER: seu_usuario_mailtrap
+      MAILTRAP_PASS: sua_senha_mailtrap
+      EMAIL_FROM: sistema@relatorios.com
+      EMAIL_TO: miguel@empresa.com
+    depends_on:
+      mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - relatorios_network
+
+  # Nginx como Proxy Reverso
+  nginx:
+    image: nginx:alpine
+    container_name: relatorios_nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - app
+    networks:
+      - relatorios_network
+
+networks:
+  relatorios_network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+    driver: local
+  rabbitmq_data:
+    driver: local
