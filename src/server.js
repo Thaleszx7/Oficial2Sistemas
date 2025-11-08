@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
 const path = require('path');
-const routes = require('../routes');
+const routes = require('./routes');
 const rabbitmq = require('./config/rabbitmq');
 
 const app = express();
