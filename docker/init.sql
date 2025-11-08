@@ -10,6 +10,7 @@ CREATE DATABASE IF NOT EXISTS pedidos_online_db
 
 USE pedidos_online_db;
 
+-- ================================================
 -- TABELA: usuarios
 -- ================================================
 DROP TABLE IF EXISTS usuarios;

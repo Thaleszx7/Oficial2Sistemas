@@ -1,21 +1,16 @@
 {
-    "name": "sistema-relatorios-miguel",
+    "name": "relatorios-async",
     "version": "1.0.0",
-    "description": "Sistema de geração assíncrona de relatórios com fila RabbitMQ",
+    "description": "Sistema de geração assíncrona de relatórios XLS",
     "main": "src/server.js",
     "scripts": {
       "start": "node src/server.js",
       "dev": "nodemon src/server.js",
-      "consumer": "node src/consumer/worker.js"
+      "consumer": "node consumer/consumer.js"
     },
-    "keywords": [
-      "reports",
-      "async",
-      "rabbitmq",
-      "excel"
-    ],
+    "keywords": ["relatórios", "async", "rabbitmq"],
     "author": "Equipe Miguel",
-    "license": "MIT",
+    "license": "ISC",
     "dependencies": {
       "express": "^4.18.2",
       "express-session": "^1.17.3",
@@ -25,11 +20,7 @@
       "exceljs": "^4.4.0",
       "nodemailer": "^6.9.7",
       "dotenv": "^16.3.1",
-      "ejs": "^3.1.9",
-      "express-flash": "^0.0.2",
-      "connect-flash": "^0.1.1",
-      "body-parser": "^1.20.2",
-      "method-override": "^3.0.0"
+      "ejs": "^3.1.9"
     },
     "devDependencies": {
       "nodemon": "^3.0.2"
