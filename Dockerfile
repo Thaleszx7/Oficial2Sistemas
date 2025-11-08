@@ -1,19 +1,19 @@
 FROM node:18-alpine
 
-# Criar diretório da aplicação
+# Define o diretório de trabalho no contêiner
 WORKDIR /app
 
-# Copiar package.json e package-lock.json
+# Copia os arquivos de configuração primeiro
 COPY package*.json ./
 
-# Instalar dependências
-RUN npm ci --only=production
+# Instala dependências
+RUN npm install --omit=dev
 
-# Copiar código da aplicação
+# Copia o restante do código
 COPY . .
 
-# Expor porta
+# Expõe a porta que o app usa (ajuste se não for 3000)
 EXPOSE 3000
 
-# Comando padrão (pode ser sobrescrito no docker-compose)
-CMD ["npm", "start"]
+# Comando de inicialização
+CMD ["node", "src/server.js"]
