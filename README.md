@@ -1,0 +1,33 @@
+# 📊 Sistema de Relatórios Assíncronos
+
+Sistema desenvolvido para solucionar o problema de timeout na geração de relatórios XLS, utilizando processamento assíncrono com RabbitMQ.
+
+# Integrantes :
+
+- Thales Almeida Souza Santos
+- Thiago Sales dos Santos 
+- Isabela Guimarães Oliveira
+- Gabriel Silva da Fonseca
+
+# Tecnologias 
+
+- *Backend*: Node.js com Express
+- *Banco de Dados*: MySQL 8.0
+- *Fila de Mensagens*: RabbitMQ
+- *Container*: Docker e Docker Compose
+- *Proxy Reverso*: Nginx
+- *CI/CD*: GitHub Actions
+- *Email*: Mailtrap (para testes)
+
+# Funcionalidades
+
+- Autenticação via login e senha  
+- Filtros por unidade e ano  
+- Listagem dos 8 primeiros registros  
+- Geração assíncrona de relatórios em Excel  
+- Envio automático por e-mail  
+- Processamento em fila com RabbitMQ  
+- Interface responsiva e intuitiva  
+
+
+

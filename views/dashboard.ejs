@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Sistema de Relatórios</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-brand">
+                <h1>📊 Sistema de Relatórios</h1>
+            </div>
+            <div class="navbar-user">
+                <span>Olá, <%= user.nome %>!</span>
+                <a href="/logout" class="btn btn-secondary btn-sm">Sair</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container main-content">
+        <div class="page-header">
+            <h2>Relatórios de Vendas</h2>
+            <p>Filtre os dados e gere relatórios em Excel</p>
+        </div>
+
+        <div class="filter-section card">
+            <h3>Filtros de Busca</h3>
+            <form action="/buscar-vendas" method="GET" class="filter-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="unidade">Unidade</label>
+                        <select id="unidade" name="unidade" class="form-control">
+                            <option value="">Todas as unidades</option>
+                            <% unidades.forEach(unidade => { %>
+                                <option value="<%= unidade %>" <%= filtros.unidade === unidade ? 'selected' : '' %>>
+                                    <%= unidade %>
+                                </option>
+                            <% }); %>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ano">Ano</label>
+                        <select id="ano" name="ano" class="form-control">
+                            <option value="">Todos os anos</option>
+                            <% anos.forEach(ano => { %>
+                                <option value="<%= ano %>" <%= filtros.ano == ano ? 'selected' : '' %>>
+                                    <%= ano %>
+                                </option>
+                            <% }); %>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary">
+                            🔍 Buscar
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <% if (vendas && vendas.length > 0) { %>
+            <div class="results-section card">
+                <div class="results-header">
+                    <h3>Resultados da Busca (8 primeiros registros)</h3>
+                    <form action="/gerar-relatorio" method="POST" style="display: inline;">
+                        <input type="hidden" name="unidade" value="<%= filtros.unidade || '' %>">
+                        <input type="hidden" name="ano" value="<%= filtros.ano || '' %>">
+                        <button type="submit" class="btn btn-success">
+                            📧 Gerar XLS e Enviar por E-mail
+                        </button>
+                    </form>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Unidade</th>
+                                <th>Produto</th>
+                                <th>Quantidade</th>
+                                <th>Valor Unit.</th>
+                                <th>Valor Total</th>
+                                <th>Data</th>
+                                <th>Cliente</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% vendas.forEach(venda => { %>
+                                <tr>
+                                    <td><%= venda.id %></td>
+                                    <td><%= venda.unidade %></td>
+                                    <td><%= venda.produto %></td>
+                                    <td><%= venda.quantidade %></td>
+                                    <td>R$ <%= parseFloat(venda.valor_unitario).toFixed(2) %></td>
+                                    <td>R$ <%= parseFloat(venda.valor_total).toFixed(2) %></td>
+                                    <td><%= new Date(venda.data_venda).toLocaleDateString('pt-BR') %></td>
+                                    <td><%= venda.cliente || 'N/A' %></td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        <% } else if (filtros.unidade || filtros.ano) { %>
+            <div class="alert alert-info">
+                Nenhum resultado encontrado com os filtros aplicados.
+            </div>
+        <% } else { %>
+            <div class="alert alert-info">
+                Use os filtros acima para buscar vendas e gerar relatórios.
+            </div>
+        <% } %>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 Sistema de Relatórios - Desenvolvido para Miguel</p>
+        </div>
+    </footer>
+</body>
+</html>
