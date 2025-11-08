@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const AuthController = require('controllers/AuthController');
-const RelatorioController = require('controllers/RelatorioController');
-const { isAuthenticated, isNotAuthenticated } = require('middleware/auth');
+const AuthController = require('./controllers/AuthController');
+const RelatorioController = require('./controllers/RelatorioController');
+const { isAuthenticated, isNotAuthenticated } = require('./middleware/auth');
 
 // Rota raiz - redireciona para dashboard se autenticado, senão para login
 router.get('/', (req, res) => {
