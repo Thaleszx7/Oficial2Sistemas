@@ -50,7 +50,7 @@ CREATE TABLE vendas (
 INSERT INTO vendas (vendedor, cliente, unidade, valor_venda, data_venda) VALUES
 ('Carlos Souza', 'João Lima', 'Salvador', 1200.50, '2024-01-15 10:20:00'),
 ('Ana Paula', 'Fernanda Rocha', 'Feira de Santana', 980.75, '2024-02-10 14:30:00'),
-('Marcos Silva', 'Cláudio Oliveira', 'Camaçari', 430.00, '2024-03-22 11:10:00'),
+('Marcos Silva', 'Cláudio Oliveira', 'Feira de Santana', 430.00, '2024-03-22 11:10:00'),
 ('Bruna Costa', 'Marina Santos', 'Lauro de Freitas', 1500.90, '2024-04-08 09:45:00'),
 ('Felipe Almeida', 'Ricardo Souza', 'Salvador', 220.00, '2024-05-19 17:00:00'),
 ('Joana Pereira', 'Rita Campos', 'Feira de Santana', 3100.00, '2024-06-11 08:40:00'),

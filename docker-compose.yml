@@ -5,43 +5,53 @@ services:
   mysql:
     image: mysql:8.0
     container_name: relatorios_mysql
-    restart: always
+    restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: root_password
-      MYSQL_DATABASE: relatorios_db
-      MYSQL_USER: relatorios_user
-      MYSQL_PASSWORD: relatorios_pass
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_password}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-relatorios_db}
+      MYSQL_USER: ${MYSQL_USER:-relatorios_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-relatorios_pass}
+      TZ: America/Sao_Paulo
     ports:
-      - "3306:3306"
+      - "${MYSQL_PORT:-3306}:3306"
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     networks:
       - relatorios_network
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      timeout: 20s
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 10s
+      timeout: 5s
       retries: 10
+      start_period: 60s
+    command: 
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
 
   # RabbitMQ
   rabbitmq:
-    image: rabbitmq:3.12-management
+    image: rabbitmq:3.12-management-alpine
     container_name: relatorios_rabbitmq
-    restart: always
+    restart: unless-stopped
     environment:
-      RABBITMQ_DEFAULT_USER: admin
-      RABBITMQ_DEFAULT_PASS: admin123
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-admin}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-admin123}
+      RABBITMQ_DEFAULT_VHOST: /
+      TZ: America/Sao_Paulo
     ports:
-      - "5672:5672"
-      - "15672:15672"
+      - "${RABBITMQ_PORT:-5672}:5672"
+      - "${RABBITMQ_MANAGEMENT_PORT:-15672}:15672"
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     networks:
       - relatorios_network
     healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "ping"]
-      timeout: 30s
-      retries: 10
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
 
   # Node.js Application
   app:
@@ -49,23 +59,26 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: relatorios_app
-    restart: always
+    restart: unless-stopped
     environment:
-      NODE_ENV: production
-      PORT: 3000
-      DB_HOST: mysql
-      DB_PORT: 3306
-      DB_USER: relatorios_user
-      DB_PASSWORD: relatorios_pass
-      DB_NAME: relatorios_db
-      RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
-      RABBITMQ_QUEUE: relatorios_queue
-      SESSION_SECRET: ${SESSION_SECRET:-seu_secret_muito_seguro_12345}
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: ${PORT:-3000}
+      DB_HOST: ${DB_HOST:-mysql}
+      DB_PORT: ${DB_PORT:-3306}
+      DB_USER: ${DB_USER:-root}
+      DB_PASSWORD: ${DB_PASSWORD:-root_password}
+      DB_NAME: ${DB_NAME:-relatorios_db}
+      RABBITMQ_URL: ${RABBITMQ_URL:-amqp://admin:admin123@rabbitmq:5672}
+      RABBITMQ_QUEUE: ${RABBITMQ_QUEUE:-relatorios_queue}
+      SESSION_SECRET: ${SESSION_SECRET:-seu_secret_muito_seguro_aqui_12345}
       MAILTRAP_HOST: ${MAILTRAP_HOST}
-      MAILTRAP_PORT: ${MAILTRAP_PORT}
+      MAILTRAP_PORT: ${MAILTRAP_PORT:-2525}
       MAILTRAP_USER: ${MAILTRAP_USER}
       MAILTRAP_PASS: ${MAILTRAP_PASS}
       EMAIL_DESTINO: ${EMAIL_DESTINO:-miguel@empresa.com.br}
+      TZ: America/Sao_Paulo
+    ports:
+      - "${APP_PORT:-3000}:3000"
     depends_on:
       mysql:
         condition: service_healthy
@@ -81,21 +94,22 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: relatorios_consumer
-    restart: always
+    restart: unless-stopped
     environment:
-      NODE_ENV: production
-      DB_HOST: mysql
-      DB_PORT: 3306
-      DB_USER: relatorios_user
-      DB_PASSWORD: relatorios_pass
-      DB_NAME: relatorios_db
-      RABBITMQ_URL: amqp://admin:admin123@rabbitmq:5672
-      RABBITMQ_QUEUE: relatorios_queue
+      NODE_ENV: ${NODE_ENV:-production}
+      DB_HOST: ${DB_HOST:-mysql}
+      DB_PORT: ${DB_PORT:-3306}
+      DB_USER: ${DB_USER:-root}
+      DB_PASSWORD: ${DB_PASSWORD:-root_password}
+      DB_NAME: ${DB_NAME:-relatorios_db}
+      RABBITMQ_URL: ${RABBITMQ_URL:-amqp://admin:admin123@rabbitmq:5672}
+      RABBITMQ_QUEUE: ${RABBITMQ_QUEUE:-relatorios_queue}
       MAILTRAP_HOST: ${MAILTRAP_HOST}
-      MAILTRAP_PORT: ${MAILTRAP_PORT}
+      MAILTRAP_PORT: ${MAILTRAP_PORT:-2525}
       MAILTRAP_USER: ${MAILTRAP_USER}
       MAILTRAP_PASS: ${MAILTRAP_PASS}
       EMAIL_DESTINO: ${EMAIL_DESTINO:-miguel@empresa.com.br}
+      TZ: America/Sao_Paulo
     depends_on:
       mysql:
         condition: service_healthy
@@ -103,30 +117,37 @@ services:
         condition: service_healthy
     networks:
       - relatorios_network
-    command: npm run consumer
+    command: node consumer/consumer.js
 
   # Nginx Reverse Proxy
   nginx:
     image: nginx:alpine
     container_name: relatorios_nginx
-    restart: always
+    restart: unless-stopped
     ports:
-      - "80:80"
-      - "443:443"
+      - "${NGINX_HTTP_PORT:-80}:80"
+      - "${NGINX_HTTPS_PORT:-443}:443"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
-    depends_on:
-      - app
     networks:
       - relatorios_network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
 networks:
   relatorios_network:
     driver: bridge
+    name: relatorios_network
 
 volumes:
   mysql_data:
     driver: local
+    name: relatorios_mysql_data
   rabbitmq_data:
     driver: local
+    name: relatorios_rabbitmq_data
