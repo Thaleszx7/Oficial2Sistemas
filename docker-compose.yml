@@ -7,8 +7,8 @@ services:
     container_name: relatorios_mysql
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_password}
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-relatorios_db}
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: pedidos_online_db 
       MYSQL_USER: ${MYSQL_USER:-relatorios_user}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-relatorios_pass}
       TZ: America/Sao_Paulo

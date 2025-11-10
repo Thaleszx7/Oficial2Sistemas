@@ -1,4 +1,3 @@
-const bcrypt = require('bcrypt');
 const db = require('../config/database');
 
 class User {
@@ -15,16 +14,16 @@ class User {
     }
   }
 
-  static async verifyPassword(plainPassword, hashedPassword) {
-    return await bcrypt.compare(plainPassword, hashedPassword);
+  static async verifyPassword(plainPassword, storedPassword) {
+    // Comparação direta - sem criptografia
+    return plainPassword === storedPassword;
   }
 
   static async create(email, password, nome) {
     try {
-      const hashedPassword = await bcrypt.hash(password, 10);
       const [result] = await db.query(
         'INSERT INTO usuarios (email, senha, nome) VALUES (?, ?, ?)',
-        [email, hashedPassword, nome]
+        [email, password, nome]
       );
       return result.insertId;
     } catch (error) {

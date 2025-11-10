@@ -3,7 +3,6 @@
 -- Banco: pedidos_online_db
 -- ================================================
 
--- Criação do banco de dados
 CREATE DATABASE IF NOT EXISTS pedidos_online_db
     CHARACTER SET utf8mb4
     COLLATE utf8mb4_unicode_ci;
@@ -19,14 +18,14 @@ CREATE TABLE usuarios (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
-    senha CHAR(40) NOT NULL, -- SHA1 gera 40 caracteres
+    senha VARCHAR(100) NOT NULL,
     criado_em DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Inserir usuário padrão (Miguel)
--- Senha original: 123456
+-- Senha: 123456 (texto plano)
 INSERT INTO usuarios (nome, email, senha)
-VALUES ('Miguel', 'miguel@empresa.com', SHA1('123456'));
+VALUES ('Miguel', 'miguel@empresa.com.br', '123456');
 
 -- ================================================
 -- TABELA: vendas
@@ -44,7 +43,7 @@ CREATE TABLE vendas (
 );
 
 -- ================================================
--- Inserção de 30 vendas (15 em 2024 e 15 em 2025)
+-- Inserção de 30 vendas
 -- ================================================
 
 INSERT INTO vendas (vendedor, cliente, unidade, valor_venda, data_venda) VALUES
@@ -63,7 +62,6 @@ INSERT INTO vendas (vendedor, cliente, unidade, valor_venda, data_venda) VALUES
 ('Ana Paula', 'Lucas Rocha', 'Lauro de Freitas', 150.00, '2024-12-28 11:30:00'),
 ('Felipe Almeida', 'Márcia Nogueira', 'Feira de Santana', 290.00, '2024-11-23 09:15:00'),
 ('Bruna Costa', 'Tiago Melo', 'Salvador', 450.00, '2024-10-30 14:00:00'),
-
 ('Carlos Souza', 'João Lima', 'Feira de Santana', 1100.00, '2025-01-12 10:00:00'),
 ('Ana Paula', 'Fernanda Rocha', 'Lauro de Freitas', 850.00, '2025-02-07 14:00:00'),
 ('Marcos Silva', 'Cláudio Oliveira', 'Salvador', 3000.00, '2025-03-15 11:10:00'),
