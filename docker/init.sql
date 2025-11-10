@@ -25,7 +25,7 @@ CREATE TABLE usuarios (
 -- Inserir usuário padrão (Miguel)
 -- Senha: 123456 (texto plano)
 INSERT INTO usuarios (nome, email, senha)
-VALUES ('Miguel', 'miguel@empresa.com.br', '123456');
+VALUES ('Miguel', 'miguel@empresa.com.br', '1234567');
 
 -- ================================================
 -- TABELA: vendas
